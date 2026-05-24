@@ -1,7 +1,0 @@
-vendor,status,supported,source_url,detail,records_count,fetched_at
-Anthropic,ok,True,https://www.anthropic.com/pricing#api,Parsed latest and legacy Claude token pricing from anthropic.com.,9,2026-05-24T14:02:54+00:00
-Cohere,unsupported,False,https://cohere.com/pricing,"Official public page exposes enterprise and Model Vault pricing, not a stable public API token pricing table.",0,2026-05-24T14:02:54+00:00
-Google,ok,True,https://ai.google.dev/gemini-api/docs/pricing?hl=en,Parsed Gemini API pricing tables from ai.google.dev.,74,2026-05-24T14:02:54+00:00
-Mistral,unsupported,False,https://mistral.ai/pricing,Official public page does not currently expose a stable API token pricing table suitable for accurate automated parsing.,0,2026-05-24T14:02:54+00:00
-OpenAI,ok,True,https://developers.openai.com/api/docs/pricing?latest-pricing=flex,Parsed official OpenAI pricing tables from developers.openai.com.,25,2026-05-24T14:02:54+00:00
-xAI,ok,True,https://docs.x.ai/docs/pricing,Parsed xAI Chat API token pricing from docs.x.ai.,5,2026-05-24T14:02:54+00:00

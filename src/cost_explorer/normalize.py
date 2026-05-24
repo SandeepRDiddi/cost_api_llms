@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 
 from cost_explorer.models import PriceRecord, SourceStatus
@@ -27,6 +25,16 @@ PRICE_COLUMNS = [
     "fetched_at",
 ]
 
+STATUS_COLUMNS = ["vendor", "status", "supported", "source_url", "detail", "records_count", "fetched_at"]
+VENDOR_SUMMARY_COLUMNS = [
+    "vendor",
+    "model_count",
+    "min_input_price",
+    "max_input_price",
+    "min_output_price",
+    "max_output_price",
+]
+
 
 def records_to_dataframe(records: list[PriceRecord]) -> pd.DataFrame:
     if not records:
@@ -39,18 +47,14 @@ def records_to_dataframe(records: list[PriceRecord]) -> pd.DataFrame:
 
 def statuses_to_dataframe(statuses: list[SourceStatus]) -> pd.DataFrame:
     if not statuses:
-        return pd.DataFrame(
-            columns=["vendor", "status", "supported", "source_url", "detail", "records_count", "fetched_at"]
-        )
+        return pd.DataFrame(columns=STATUS_COLUMNS)
     frame = pd.DataFrame([status.to_dict() for status in statuses])
-    return frame.sort_values(by=["vendor"], kind="stable").reset_index(drop=True)
+    return frame[STATUS_COLUMNS].sort_values(by=["vendor"], kind="stable").reset_index(drop=True)
 
 
 def build_vendor_summary(current_prices: pd.DataFrame) -> pd.DataFrame:
     if current_prices.empty:
-        return pd.DataFrame(
-            columns=["vendor", "model_count", "min_input_price", "max_input_price", "min_output_price", "max_output_price"]
-        )
+        return pd.DataFrame(columns=VENDOR_SUMMARY_COLUMNS)
 
     summary = (
         current_prices.groupby("vendor", dropna=False)
@@ -63,16 +67,15 @@ def build_vendor_summary(current_prices: pd.DataFrame) -> pd.DataFrame:
         )
         .reset_index()
     )
-    return summary
+    return summary[VENDOR_SUMMARY_COLUMNS]
 
 
-def combine_history(history_dir: Path) -> pd.DataFrame:
-    snapshots = sorted(history_dir.glob("prices_*.csv"))
-    if not snapshots:
+def merge_price_history(*frames: pd.DataFrame) -> pd.DataFrame:
+    normalized_frames = [frame.reindex(columns=PRICE_COLUMNS) for frame in frames if not frame.empty]
+    if not normalized_frames:
         return pd.DataFrame(columns=PRICE_COLUMNS)
 
-    frames = [pd.read_csv(path) for path in snapshots]
-    history = pd.concat(frames, ignore_index=True)
+    history = pd.concat(normalized_frames, ignore_index=True)
     history = history.drop_duplicates(
         subset=["vendor", "model_name", "service_tier", "modality", "fetched_at"], keep="last"
     )

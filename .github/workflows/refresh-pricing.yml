@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: "0 6 * * *"
 
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -28,14 +31,20 @@ jobs:
           PYTHONPATH: src
         run: python -m cost_explorer
 
-      - name: Upload pricing artifacts
+      - name: Commit updated workbook
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/llm_costs.xlsx
+          if git diff --cached --quiet; then
+            echo "No workbook changes to commit."
+            exit 0
+          fi
+          git commit -m "Update master pricing workbook"
+          git push
+
+      - name: Upload pricing artifact
         uses: actions/upload-artifact@v4
         with:
-          name: llm-pricing-data
-          path: |
-            data/prices_current.csv
-            data/prices_current.json
-            data/source_status.csv
-            data/prices_history.csv
-            data/llm_costs.xlsx
-            data/run_metadata.json
+          name: llm-pricing-workbook
+          path: data/llm_costs.xlsx

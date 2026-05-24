@@ -1,15 +1,14 @@
 # LLM Cost Explorer
 
-Python CLI that fetches official LLM pricing pages, normalizes token pricing into flat datasets, and exports Excel-friendly outputs for daily analysis.
+Python CLI that fetches official LLM pricing pages, normalizes token pricing, and updates one master Excel workbook for ongoing analysis.
 
 ## What it does
 
 - pulls pricing from official vendor pages
 - normalizes comparable token pricing into one schema
-- exports `CSV`, `JSON`, and `XLSX`
-- stores dated snapshots for historical analysis
+- updates one persistent `XLSX` master workbook
 - supports daily and manual refresh via GitHub Actions
-- keeps a `source_status` report so coverage and failures are visible
+- keeps `source_status`, history, and run metadata inside the workbook
 
 ## Current coverage
 
@@ -53,18 +52,13 @@ PYTHONPATH=src python3 -m cost_explorer
 Optional flags:
 
 ```bash
-PYTHONPATH=src python3 -m cost_explorer --output-dir data --history-dir data/history
+PYTHONPATH=src python3 -m cost_explorer --output-dir data
 PYTHONPATH=src python3 -m cost_explorer --allow-partial
 ```
 
 ## Outputs
 
-- `data/prices_current.csv`
-- `data/prices_current.json`
-- `data/source_status.csv`
-- `data/prices_history.csv`
 - `data/llm_costs.xlsx`
-- `data/history/prices_<timestamp>.csv`
 
 ## Excel sheets
 
@@ -72,6 +66,18 @@ PYTHONPATH=src python3 -m cost_explorer --allow-partial
 - `source_status`
 - `vendor_summary`
 - `price_history`
+- `run_metadata`
+
+Each run refreshes the current-summary sheets and appends any new snapshot rows into `price_history` in the same workbook, so `data/llm_costs.xlsx` is the master file.
+
+## Testing
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pytest -q
+```
 
 ## GitHub Actions
 
@@ -80,4 +86,4 @@ The workflow runs daily and can also be triggered manually:
 - schedule: `0 6 * * *`
 - manual: `workflow_dispatch`
 
-It installs dependencies, runs the exporter, and uploads the generated files as artifacts.
+It installs dependencies, updates `data/llm_costs.xlsx`, commits that workbook back to the repository when it changes, and uploads the workbook as an artifact.
