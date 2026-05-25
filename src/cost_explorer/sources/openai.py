@@ -19,7 +19,7 @@ class OpenAISource(SourceAdapter):
         html = fetch_html(self.source_url)
         soup = BeautifulSoup(html, "html.parser")
         table_tags = soup.find_all("table")
-        tables = pd.read_html(StringIO(html))
+        tables = pd.read_html(StringIO(html), flavor="html5lib")
 
         records: list[PriceRecord] = []
         seen: set[tuple[str, str, str, str]] = set()

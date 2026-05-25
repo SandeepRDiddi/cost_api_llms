@@ -45,7 +45,7 @@ class GoogleSource(SourceAdapter):
                 if element.name != "table" or not current_tier:
                     continue
 
-                frame = pd.read_html(StringIO(str(element)))[0]
+                frame = pd.read_html(StringIO(str(element)), flavor="html5lib")[0]
                 records.extend(self._parse_table(model_name, current_tier, frame, fetched_at))
 
         return SourceResult(

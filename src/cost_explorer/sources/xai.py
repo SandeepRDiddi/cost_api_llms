@@ -16,7 +16,7 @@ class XAISource(SourceAdapter):
 
     def fetch(self, fetched_at: str) -> SourceResult:
         html = fetch_html(self.source_url)
-        tables = pd.read_html(StringIO(html))
+        tables = pd.read_html(StringIO(html), flavor="html5lib")
 
         records: list[PriceRecord] = []
         for frame in tables:
